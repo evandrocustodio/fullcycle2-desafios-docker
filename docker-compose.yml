@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  app:
+    build:
+     context: node
+    networks:
+      - node-network
+    volumes:
+      - ./node:/usr/src/app
+    tty: true
+    container_name: app
+    ports:
+      - 3000:3000
+    entrypoint: dockerize  --wait tcp://db:3306  --timeout 20s node index.js
+  db:
+    image: mysql
+    container_name: db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - node-network      
+    ports:
+      - 3306:3306      
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - node-network            
+
+
+networks:
+  node-network:
+    driver: bridge                       
+
